@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todolist/database.dart';
 import 'package:todolist/screens/newtodo.dart';
 import 'package:todolist/widgets.dart';
 import 'package:todolist/constants.dart';
@@ -11,6 +12,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  DatabaseHelper _dbHelper = DatabaseHelper();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,19 +33,20 @@ class _HomeState extends State<Home> {
                 ),
               ),
               Expanded(
-                child: ListView(
-                  children: [
-                    TaskCard(),
-                    TaskCard(),
-                    TaskCard(),
-                    TaskCard(),
-                    TaskCard(),
-                    TaskCard(),
-                    TaskCard(),
-                    TaskCard(),
-                  ],
-                ),
-              ),
+                  child: FutureBuilder(
+                initialData: [],
+                future: _dbHelper.getTasks(),
+                builder: (context, snapshot) {
+                  return ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (context, index) {
+                      return TaskCard(
+                        title: snapshot.data[index].title,
+                      );
+                    },
+                  );
+                },
+              )),
               Button(
                 text: 'Add a new task',
                 colour: addTaskColor,
@@ -53,7 +56,9 @@ class _HomeState extends State<Home> {
                     MaterialPageRoute(
                       builder: (context) => todopage(),
                     ),
-                  );
+                  ).then((value) {
+                    setState(() {});
+                  });
                 },
               ),
             ],

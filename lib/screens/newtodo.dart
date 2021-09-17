@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todolist/constants.dart';
+import 'package:todolist/database.dart';
+import 'package:todolist/model/task.dart';
 import 'package:todolist/widgets.dart';
 
 class todopage extends StatefulWidget {
@@ -35,8 +37,18 @@ class _todopageState extends State<todopage> {
                     ),
                     Expanded(
                       child: TextField(
+                        onSubmitted: (value) async {
+                          if (value != "") {
+                            DatabaseHelper _dbhelper = DatabaseHelper();
+                            Task _newtask = Task(title: value);
+                            await _dbhelper.insertTask(_newtask);
+                            print("Task addition succesful");
+                          }
+                        },
                         decoration: InputDecoration(
-                            hintText: 'Enter a task', border: InputBorder.none),
+                          hintText: 'Enter a task',
+                          border: InputBorder.none,
+                        ),
                       ),
                     ),
                   ],
