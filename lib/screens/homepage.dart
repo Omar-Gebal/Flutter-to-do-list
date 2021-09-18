@@ -40,8 +40,19 @@ class _HomeState extends State<Home> {
                   return ListView.builder(
                     itemCount: snapshot.data.length,
                     itemBuilder: (context, index) {
-                      return TaskCard(
-                        title: snapshot.data[index].title,
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  todopage(task: snapshot.data[index]),
+                            ),
+                          );
+                        },
+                        child: TaskCard(
+                          title: snapshot.data[index].title,
+                        ),
                       );
                     },
                   );
@@ -54,7 +65,7 @@ class _HomeState extends State<Home> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => todopage(),
+                      builder: (context) => todopage(task: null),
                     ),
                   ).then((value) {
                     setState(() {});
