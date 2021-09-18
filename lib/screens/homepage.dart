@@ -48,10 +48,11 @@ class _HomeState extends State<Home> {
                               builder: (context) =>
                                   todopage(task: snapshot.data[index]),
                             ),
-                          );
+                          ).then((value) => {setState(() {})});
                         },
                         child: TaskCard(
                           title: snapshot.data[index].title,
+                          description: snapshot.data[index].description,
                         ),
                       );
                     },

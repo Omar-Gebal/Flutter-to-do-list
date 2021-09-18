@@ -49,7 +49,9 @@ class TodoCard extends StatelessWidget {
               border: finished ? null : Border.all(color: Colors.black),
             ),
           ),
-          Text(text ?? 'no todo'),
+          Flexible(
+            child: Text(text ?? 'no todo'),
+          ),
         ],
       ),
     );

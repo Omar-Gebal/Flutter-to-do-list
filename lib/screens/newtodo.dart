@@ -19,15 +19,37 @@ class _todopageState extends State<todopage> {
 
   int _taskId = 0;
   String _tasktitle = '';
+  String _taskDescription = '';
+
+  FocusNode _titleFocus;
+  FocusNode _descriptionFocus;
+  FocusNode _todoFocus;
+  bool _contentVisible = false;
 
   @override
   void initState() {
     // TODO: implement initState
     if (widget.task != null) {
+      // Set visibility to true
+      _contentVisible = true;
       _tasktitle = widget.task.title;
+      _taskDescription = widget.task.description;
       _taskId = widget.task.id;
     }
+    _titleFocus = FocusNode();
+    _descriptionFocus = FocusNode();
+    _todoFocus = FocusNode();
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _titleFocus.dispose();
+    _todoFocus.dispose();
+    _descriptionFocus.dispose();
+    super.dispose();
   }
 
   @override
@@ -55,6 +77,7 @@ class _todopageState extends State<todopage> {
                     ),
                     Expanded(
                       child: TextField(
+                        focusNode: _titleFocus,
                         onSubmitted: (value) async {
                           // make sure the field is not empty
                           if (value != "") {
@@ -62,11 +85,16 @@ class _todopageState extends State<todopage> {
                             if (widget.task == null) {
                               DatabaseHelper _dbhelper = DatabaseHelper();
                               Task _newtask = Task(title: value);
-                              await _dbhelper.insertTask(_newtask);
-                              print("Task addition succesful");
+                              _taskId = await _dbhelper.insertTask(_newtask);
+                              setState(() {
+                                _contentVisible = true;
+                              });
+                              print('New task Id: $_taskId');
                             } else {
-                              print('edit');
+                              await _dbhelper.updateTaskTitle(_taskId, value);
+                              print('task updated');
                             }
+                            _descriptionFocus.requestFocus();
                           }
                         },
                         controller: TextEditingController()..text = _tasktitle,
@@ -80,81 +108,122 @@ class _todopageState extends State<todopage> {
                 ),
               ),
               // description
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                child: TextField(
-                  decoration: InputDecoration(
-                      hintText: 'Enter a description',
-                      border: InputBorder.none),
+              Visibility(
+                visible: _contentVisible,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: TextField(
+                    focusNode: _descriptionFocus,
+                    onSubmitted: (value) async {
+                      if (value != "") {
+                        if (_taskId != 0) {
+                          await _dbhelper.updateTaskDescription(_taskId, value);
+                          _taskDescription = value;
+                        }
+                      }
+                      _todoFocus.requestFocus();
+                    },
+                    controller: TextEditingController()
+                      ..text = _taskDescription,
+                    decoration: InputDecoration(
+                        hintText: 'Enter a description',
+                        border: InputBorder.none),
+                  ),
                 ),
               ),
               //todo list
-              FutureBuilder(
-                initialData: [],
-                future: _dbhelper.getTodo(_taskId),
-                builder: (context, snapshot) {
-                  return Expanded(
-                    child: ListView.builder(
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              //switch todo state
-                            },
-                            child: TodoCard(
-                              text: snapshot.data[index].title,
-                              finished: snapshot.data[index].finished == 0
-                                  ? false
-                                  : true,
-                            ),
-                          );
-                        }),
-                  );
-                },
+              Visibility(
+                visible: _contentVisible,
+                child: FutureBuilder(
+                  initialData: [],
+                  future: _dbhelper.getTodo(_taskId),
+                  builder: (context, snapshot) {
+                    return Expanded(
+                      child: ListView.builder(
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () async {
+                                //switch todo state
+                                if (snapshot.data[index].finished == 0) {
+                                  await _dbhelper.updateTodoDone(
+                                      snapshot.data[index].id, 1);
+                                } else {
+                                  await _dbhelper.updateTodoDone(
+                                      snapshot.data[index].id, 0);
+                                }
+                                setState(() {});
+                              },
+                              child: TodoCard(
+                                text: snapshot.data[index].title,
+                                finished: snapshot.data[index].finished == 0
+                                    ? false
+                                    : true,
+                              ),
+                            );
+                          }),
+                    );
+                  },
+                ),
               ),
               //new todo
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(right: 5),
-                      padding: EdgeInsets.all(5),
-                      child: Image.asset('images/check_icon.png'),
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: Colors.black),
+              Visibility(
+                visible: _contentVisible,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(right: 5),
+                        padding: EdgeInsets.all(5),
+                        child: Image.asset('images/check_icon.png'),
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(color: Colors.black),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                        child: TextField(
-                      onSubmitted: (value) async {
-                        // make sure the field is not empty
-                        if (value != "") {
-                          //check if task is null
-                          if (widget.task != null) {
-                            Todo _newTodo = Todo(
-                                title: value,
-                                taskId: widget.task.id,
-                                finished: 0);
-                            await _dbhelper.insertTodo(_newTodo);
-                            setState(() {});
+                      Expanded(
+                          child: TextField(
+                        focusNode: _todoFocus,
+                        controller: TextEditingController()..text = '',
+                        onSubmitted: (value) async {
+                          // make sure the field is not empty
+                          if (value != "") {
+                            if (_taskId != 0) {
+                              Todo _newTodo = Todo(
+                                  title: value, taskId: _taskId, finished: 0);
+                              await _dbhelper.insertTodo(_newTodo);
+                              setState(() {});
+                              _todoFocus.requestFocus();
+                            }
                           }
-                        }
-                      },
-                      decoration: InputDecoration(
-                          hintText: 'Enter todo item',
-                          border: InputBorder.none),
-                    )),
-                  ],
+                        },
+                        decoration: InputDecoration(
+                            hintText: 'Enter todo item',
+                            border: InputBorder.none),
+                      )),
+                    ],
+                  ),
                 ),
               ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Button(text: 'Delete todo', colour: deleteTodoColor),
+              Visibility(
+                visible: _contentVisible,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Button(
+                    text: 'Delete task',
+                    colour: deleteTodoColor,
+                    onPress: () async {
+                      if (_taskId != null) {
+                        await _dbhelper.deleteTask(_taskId);
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+                ),
               )
             ],
           ),
