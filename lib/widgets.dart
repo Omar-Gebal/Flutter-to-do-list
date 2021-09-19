@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:todolist/constants.dart';
 import 'package:todolist/screens/newtodo.dart';
 
 class TaskCard extends StatelessWidget {
@@ -13,15 +14,19 @@ class TaskCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 25),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15.0), color: Colors.blue),
+          borderRadius: BorderRadius.circular(15.0), color: taskCardColor),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title ?? "unnamed task",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 35, fontWeight: FontWeight.bold, color: titleColor),
           ),
-          Text(description ?? 'That is a task without a description')
+          Text(
+            description ?? 'That is a task without a description',
+            style: TextStyle(color: descriptionColor, fontSize: 20),
+          )
         ],
       ),
     );
@@ -46,11 +51,14 @@ class TodoCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: finished ? Colors.pink : Colors.transparent,
               borderRadius: BorderRadius.circular(5),
-              border: finished ? null : Border.all(color: Colors.black),
+              border: finished ? null : Border.all(color: todoBorderColor),
             ),
           ),
           Flexible(
-            child: Text(text ?? 'no todo'),
+            child: Text(
+              text ?? 'no todo',
+              style: TextStyle(color: todoColor, fontSize: 20),
+            ),
           ),
         ],
       ),
@@ -77,7 +85,13 @@ class Button extends StatelessWidget {
           color: colour,
           borderRadius: BorderRadius.circular(15),
         ),
-        child: Text('$text'),
+        child: Text(
+          '$text',
+          style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: myBackGroundColor),
+        ),
       ),
     );
   }

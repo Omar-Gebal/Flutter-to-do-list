@@ -56,6 +56,7 @@ class _todopageState extends State<todopage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: myBackGroundColor,
         body: Container(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,6 +78,10 @@ class _todopageState extends State<todopage> {
                     ),
                     Expanded(
                       child: TextField(
+                        style: TextStyle(
+                            color: titleColor,
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold),
                         focusNode: _titleFocus,
                         onSubmitted: (value) async {
                           // make sure the field is not empty
@@ -100,6 +105,10 @@ class _todopageState extends State<todopage> {
                         controller: TextEditingController()..text = _tasktitle,
                         decoration: InputDecoration(
                           hintText: 'Enter a task',
+                          hintStyle: TextStyle(
+                              fontSize: 35,
+                              fontWeight: FontWeight.bold,
+                              color: hintColor),
                           border: InputBorder.none,
                         ),
                       ),
@@ -113,6 +122,7 @@ class _todopageState extends State<todopage> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: TextField(
+                    style: TextStyle(color: descriptionColor),
                     focusNode: _descriptionFocus,
                     onSubmitted: (value) async {
                       if (value != "") {
@@ -126,6 +136,7 @@ class _todopageState extends State<todopage> {
                     controller: TextEditingController()
                       ..text = _taskDescription,
                     decoration: InputDecoration(
+                        hintStyle: TextStyle(color: hintColor),
                         hintText: 'Enter a description',
                         border: InputBorder.none),
                   ),
@@ -181,11 +192,12 @@ class _todopageState extends State<todopage> {
                         decoration: BoxDecoration(
                           color: Colors.transparent,
                           borderRadius: BorderRadius.circular(5),
-                          border: Border.all(color: Colors.black),
+                          border: Border.all(color: todoBorderColor),
                         ),
                       ),
                       Expanded(
                           child: TextField(
+                        style: TextStyle(color: todoColor, fontSize: 20),
                         focusNode: _todoFocus,
                         controller: TextEditingController()..text = '',
                         onSubmitted: (value) async {
@@ -201,6 +213,8 @@ class _todopageState extends State<todopage> {
                           }
                         },
                         decoration: InputDecoration(
+                            hintStyle:
+                                TextStyle(color: hintColor, fontSize: 20),
                             hintText: 'Enter todo item',
                             border: InputBorder.none),
                       )),
